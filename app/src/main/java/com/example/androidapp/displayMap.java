@@ -3,6 +3,7 @@ package com.example.androidapp;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -21,12 +22,16 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Locale;
 
 public class displayMap extends FragmentActivity implements OnMapReadyCallback {
 
     static LatLng latLng = new LatLng(0,0);
+    static double lat =0;
+    static double lng =0;
+    static String adminArea ="";
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -39,28 +44,35 @@ public class displayMap extends FragmentActivity implements OnMapReadyCallback {
             try {
                 while (addressList == null) {
                     addressList = geocoder.getFromLocationName(message, 1);
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
             Address address = addressList.get(0);
             latLng = new LatLng(address.getLatitude(), address.getLongitude());
+            adminArea = address.getSubAdminArea();
             MapFragment mapFragment = (MapFragment) getFragmentManager()
                     .findFragmentById(R.id.map);
             mapFragment.getMapAsync(this);
+            lat=latLng.latitude;
+            lng = latLng.longitude;
+
 
         }
 
     }
     public void onMapReady(GoogleMap map) {
-        CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(latLng,100);
+        CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(latLng,15);
         map.animateCamera(yourLocation);
-        map.setMinZoomPreference(6.0f);
-        map.setMaxZoomPreference(14.0f);
-
+        DecimalFormat df = new DecimalFormat("#.###");
+        double newLat = lat;
+        double newLong = lng;
+        df.format(newLat);
+        String title = "County: " + adminArea ;
         map.addMarker(new MarkerOptions()
                 .position(latLng)
-                .title("Marker"));
+                .title(title));
     }
     public static class FirstFragment extends MapFragment implements OnMapReadyCallback {
         GoogleMap googleMap;
